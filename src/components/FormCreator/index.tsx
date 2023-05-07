@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input, InputNumber, Button, Checkbox } from 'antd';
+import { Form, Input, InputNumber, Button, Checkbox, Select } from 'antd';
 import { FormItemProps } from 'antd/lib/form';
-import _ from 'lodash';
+import _ from 'lodash-es';
 import { ColorPicker } from './ColorPicker';
-import { getLocale } from '@/locale';
+import { FormattedMessage } from 'react-intl';
 
 type Props = {
   /** 表单配置 */
@@ -21,6 +21,8 @@ type Props = {
     [key: string]: any;
   };
   onChange: (v: any) => void;
+  /** 列表型内容 */
+  isList: boolean;
 };
 
 const FormItemComponentMap = (type: string) => (
@@ -29,6 +31,8 @@ const FormItemComponentMap = (type: string) => (
   switch (type) {
     case 'checkbox':
       return <Checkbox {...props} />;
+    case 'select':
+      return <Select {...props} />;
     case 'input':
       return <Input {...props} />;
     case 'number':
@@ -43,7 +47,6 @@ const FormItemComponentMap = (type: string) => (
 };
 
 export const FormCreator: React.FC<Props> = props => {
-  const i18n = getLocale();
   const [fields, setFields] = useState([]);
 
   useEffect(() => {
@@ -54,16 +57,26 @@ export const FormCreator: React.FC<Props> = props => {
     setFields(datas);
   }, [props.value]);
 
-  const onFinish = (values: any) => {
+  const handleChange = (values: any) => {
+    if ('edu_time' in values && typeof values.edu_time === 'string') {
+      values.edu_time = values.edu_time.split(',');
+    }
+    if ('work_time' in values) {
+      values.work_time = values.work_time.split(',');
+    }
     props.onChange(values);
   };
+  const formProps = {
+    [props.isList ? 'onFinish' : 'onValuesChange']: handleChange,
+  };
+
   return (
     <div>
       <Form
         labelCol={{ span: 6 }}
         initialValues={props.value}
         fields={fields}
-        onFinish={onFinish}
+        {...formProps}
       >
         {_.map(props.config, c => {
           return (
@@ -81,11 +94,13 @@ export const FormCreator: React.FC<Props> = props => {
             </Form.Item>
           );
         })}
-        <Form.Item wrapperCol={{ offset: 6 }}>
-          <Button type="primary" htmlType="submit">
-            {i18n.get('提交')}
-          </Button>
-        </Form.Item>
+        {props.isList && (
+          <Form.Item wrapperCol={{ offset: 6 }}>
+            <Button type="primary" htmlType="submit">
+              <FormattedMessage id="提交" />
+            </Button>
+          </Form.Item>
+        )}
       </Form>
     </div>
   );

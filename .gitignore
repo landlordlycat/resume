@@ -11,14 +11,21 @@ node_modules
 
 # Optional npm cache directory
 .npm
-package-lock.json
 
 .DS_Store
 
 # vscode editor
 .vscode
 
+# webstorm editor
+.idea
 
 # gatsby files
 .cache/
 public
+
+# package lock file
+package-lock.json
+
+# temp
+**temp**

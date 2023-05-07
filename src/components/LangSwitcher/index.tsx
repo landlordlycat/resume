@@ -2,14 +2,15 @@ import React from 'react';
 import cx from 'classnames';
 import { Popover } from 'antd';
 import qs from 'query-string';
-import { getLanguage, getLocale } from '@/locale';
+import { getLanguage } from '@/i18n';
 import { getMode } from '@/hooks/useModeSwitcher';
 import './index.less';
+import { useIntl } from 'react-intl';
 
 export const LangSwitcher = ({ className }: { className?: string }) => {
   const lang = getLanguage();
   const mode = getMode();
-  const i18n = getLocale();
+  const intl = useIntl();
 
   const changeLanguage = value => {
     if (value === lang) return;
@@ -30,15 +31,17 @@ export const LangSwitcher = ({ className }: { className?: string }) => {
   const RadioContent = (
     <span>
       <span
-        className={cx('lang', { unselected: lang !== 'zh_CN' })}
-        onClick={() => changeLanguage('zh_CN')}
+        className={cx('lang')}
+        onClick={() => changeLanguage('zh-CN')}
+        data-lang="zh-CN"
       >
         中
       </span>
       <span className="divider">/</span>
       <span
-        className={cx('lang', { unselected: lang !== 'en_US' })}
-        onClick={() => changeLanguage('en_US')}
+        className={cx('lang')}
+        onClick={() => changeLanguage('en-US')}
+        data-lang="en-US"
       >
         En
       </span>
@@ -49,9 +52,9 @@ export const LangSwitcher = ({ className }: { className?: string }) => {
     <div className={cx('language-switcher', className)}>
       {mode === 'edit' ? (
         <Popover
-          content={i18n.get(
-            '编辑模式下, 切换国际化会导致正在配置的内容丢失，请及时保存'
-          )}
+          content={intl.formatMessage({
+            id: '编辑模式下, 切换国际化会导致正在配置的内容丢失，请及时保存',
+          })}
           placement="left"
         >
           {RadioContent}

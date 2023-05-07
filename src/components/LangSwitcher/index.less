@@ -6,11 +6,17 @@
   .divider {
     padding: 0 4px;
   }
+}
 
-  span.lang {
-    &.unselected {
-      color: rgba(255, 255, 255, 0.25);
-      cursor: pointer;
-    }
+body[lang='en-US'] {
+  .language-switcher span[data-lang='zh-CN'] {
+    color: rgba(255, 255, 255, 0.25);
+    cursor: pointer;
+  }
+}
+body[lang='zh-CN'] {
+  .language-switcher span[data-lang='en-US'] {
+    color: rgba(255, 255, 255, 0.25);
+    cursor: pointer;
   }
 }

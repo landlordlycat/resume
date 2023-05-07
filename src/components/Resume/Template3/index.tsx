@@ -8,12 +8,15 @@ import {
   TrophyFilled,
   CheckCircleFilled,
   ScheduleFilled,
+  EnvironmentFilled,
+  HeartFilled,
   CrownFilled,
 } from '@ant-design/icons';
-import _ from 'lodash';
-import { ResumeConfig, ThemeConfig } from '../../types';
+import _ from 'lodash-es';
+import { FormattedMessage, useIntl } from 'react-intl';
+import { getDefaultTitleNameMap } from '@/data/constant';
+import type { ResumeConfig, ThemeConfig } from '../../types';
 import './index.less';
-import { getLocale } from '@/locale';
 
 type Props = {
   value: ResumeConfig;
@@ -32,7 +35,7 @@ const wrapper = ({ id, title, color }) => WrappedComponent => {
 };
 
 const CardWrapper: React.FC<{
-  title: string;
+  title: string | JSX.Element;
   className: string;
   color: string;
 }> = ({ title, color, className, children }) => {
@@ -51,11 +54,17 @@ const CardWrapper: React.FC<{
  * @description 简历内容区
  */
 export const Template3: React.FC<Props> = props => {
-  const i18n = getLocale();
+  const intl = useIntl();
   const { value, theme } = props;
 
   /** 个人基础信息 */
   const profile = _.get(value, 'profile');
+
+  const titleNameMap = _.get(
+    value,
+    'titleNameMap',
+    getDefaultTitleNameMap({ intl })
+  );
 
   /** 教育背景 */
   const educationList = _.get(value, 'educationList');
@@ -128,7 +137,27 @@ export const Template3: React.FC<Props> = props => {
             {profile?.workExpYear && (
               <div className="work-exp-year">
                 <ScheduleFilled style={{ color: theme.color, opacity: 0.85 }} />
-                <span>{i18n.get('工作经验')}: {profile.workExpYear}</span>
+                <span>
+                  <FormattedMessage id="工作经验" />: {profile.workExpYear}
+                </span>
+              </div>
+            )}
+            {profile?.workPlace && (
+              <div className="work-place">
+                <EnvironmentFilled
+                  style={{ color: theme.color, opacity: 0.85 }}
+                />
+                <span>
+                  <FormattedMessage id="期望工作地" />: {profile.workPlace}
+                </span>
+              </div>
+            )}
+            {profile?.positionTitle && (
+              <div className="expect-job">
+                <HeartFilled style={{ color: theme.color, opacity: 0.85 }} />
+                <span>
+                  <FormattedMessage id="职位" />: {profile.positionTitle}
+                </span>
               </div>
             )}
           </div>
@@ -137,7 +166,8 @@ export const Template3: React.FC<Props> = props => {
         {/* 教育背景 */}
         {educationList?.length ? (
           <CardWrapper
-            title={i18n.get("教育背景")}
+            // title=<FormattedMessage id="教育背景" />
+            title={titleNameMap.educationList}
             className="section section-education"
             color={theme.color}
           >
@@ -162,7 +192,7 @@ export const Template3: React.FC<Props> = props => {
                     </span>
                     <span className="sub-info" style={{ float: 'right' }}>
                       {start}
-                      {end ? ` ~ ${end}` : ` ${i18n.get('至今')}`}
+                      {end ? ` ~ ${end}` : <FormattedMessage id=" 至今" />}
                     </span>
                   </div>
                 </div>
@@ -170,9 +200,10 @@ export const Template3: React.FC<Props> = props => {
             })}
           </CardWrapper>
         ) : null}
-        {workList.length ? (
+        {workList?.length ? (
           <CardWrapper
-            title={i18n.get("个人作品")}
+            // title=<FormattedMessage id="个人作品" />
+            title={titleNameMap.workList}
             className="section section-work"
             color={theme.color}
           >
@@ -185,7 +216,7 @@ export const Template3: React.FC<Props> = props => {
                     />
                     <b className="info-name">{work.work_name}</b>
                     <a className="sub-info" href={work.visit_link}>
-                      {i18n.get('访问链接')}
+                      <FormattedMessage id="访问链接" />
                     </a>
                   </div>
                   {work.work_desc && <div>{work.work_desc}</div>}
@@ -195,7 +226,7 @@ export const Template3: React.FC<Props> = props => {
           </CardWrapper>
         ) : null}
         <CardWrapper
-          title={i18n.get("自我介绍")}
+          title={<FormattedMessage id="自我介绍" />}
           className="section section-aboutme"
           color={theme.color}
         >
@@ -206,7 +237,8 @@ export const Template3: React.FC<Props> = props => {
         {/* 专业技能 */}
         {skillList?.length ? (
           <CardWrapper
-            title={i18n.get('专业技能')}
+            // title=<FormattedMessage id="专业技能" />
+            title={titleNameMap.skillList}
             className="section section-skill"
             color={theme.color}
           >
@@ -235,7 +267,8 @@ export const Template3: React.FC<Props> = props => {
         ) : null}
         {awardList?.length ? (
           <CardWrapper
-            title={i18n.get("更多信息")}
+            // title=<FormattedMessage id="更多信息" />
+            title={titleNameMap.awardList}
             className="section section-award"
             color={theme.color}
           >
@@ -258,63 +291,83 @@ export const Template3: React.FC<Props> = props => {
         ) : null}
       </div>
       <div className="main-info">
-        {wrapper({
-          id: 'work-experience',
-          title: i18n.get('工作经历'),
-          color: theme.color,
-        })(
-          <div className="section section-work-exp">
-            {_.map(workExpList, (work, idx) => {
-              const start = work.work_time[0];
-              const end = work.work_time[1] ? work.work_time[1] : null;
-              return work ? (
-                <div className="section-item" key={idx.toString()}>
-                  <div className="section-info">
-                    <b className="info-name">
-                      {work.company_name}
-                      <span className="sub-info">{work.department_name}</span>
-                    </b>
-                    <span className="info-time">
-                      {start}
-                      {end ? ` ~ ${end}` : ` ${i18n.get('至今')}`}
-                    </span>
-                  </div>
-                  <div className="work-description">{work.work_desc}</div>
-                </div>
-              ) : null;
-            })}
-          </div>
-        )}
+        {workExpList?.length
+          ? wrapper({
+              id: 'work-experience',
+              title: titleNameMap?.workExpList,
+              color: theme.color,
+            })(
+              <div className="section section-work-exp">
+                {_.map(workExpList, (work, idx) => {
+                  const [start = null, end = null] =
+                    typeof work.work_time === 'string'
+                      ? `${work.work_time || ''}`.split(',')
+                      : work.work_time;
+                  return work ? (
+                    <div className="section-item" key={idx.toString()}>
+                      <div className="section-info">
+                        <b className="info-name">
+                          {work.company_name}
+                          <span className="sub-info">
+                            {work.department_name}
+                          </span>
+                        </b>
+                        <span className="info-time">
+                          {start}
+                          {end ? ` ~ ${end}` : <FormattedMessage id=" 至今" />}
+                        </span>
+                      </div>
+                      <div className="work-description">{work.work_desc}</div>
+                    </div>
+                  ) : null;
+                })}
+              </div>
+            )
+          : null}
 
-        {wrapper({ id: 'skill', title: i18n.get('项目经历'), color: theme.color })(
-          <div className="section section-project">
-            {_.map(projectList, (project, idx) =>
-              project ? (
-                <div className="section-item" key={idx.toString()}>
-                  <div className="section-info">
-                    <b className="info-name">
-                      {project.project_name}
-                      <span className="info-time">{project.project_time}</span>
-                    </b>
-                    {project.project_role && (
-                      <Tag color={theme.tagColor}>{project.project_role}</Tag>
-                    )}
-                  </div>
-                  <div className="section-detail">
-                    <b>{i18n.get('项目描述')}：</b>
-                    <span>{project.project_desc}</span>
-                  </div>
-                  <div className="section-detail">
-                    <b>{i18n.get('主要工作')}：</b>
-                    <span className="project-content">
-                      {project.project_content}
-                    </span>
-                  </div>
-                </div>
-              ) : null
-            )}
-          </div>
-        )}
+        {projectList?.length
+          ? wrapper({
+              id: 'skill',
+              title: titleNameMap?.projectList,
+              color: theme.color,
+            })(
+              <div className="section section-project">
+                {_.map(projectList, (project, idx) =>
+                  project ? (
+                    <div className="section-item" key={idx.toString()}>
+                      <div className="section-info">
+                        <b className="info-name">
+                          {project.project_name}
+                          <span className="info-time">
+                            {project.project_time}
+                          </span>
+                        </b>
+                        {project.project_role && (
+                          <Tag color={theme.tagColor}>
+                            {project.project_role}
+                          </Tag>
+                        )}
+                      </div>
+                      <div className="section-detail">
+                        <b>
+                          <FormattedMessage id="项目描述" />：
+                        </b>
+                        <span>{project.project_desc}</span>
+                      </div>
+                      <div className="section-detail">
+                        <b>
+                          <FormattedMessage id="主要工作" />：
+                        </b>
+                        <span className="project-content">
+                          {project.project_content}
+                        </span>
+                      </div>
+                    </div>
+                  ) : null
+                )}
+              </div>
+            )
+          : null}
       </div>
     </div>
   );

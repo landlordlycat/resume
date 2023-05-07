@@ -1,12 +1,13 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import cx from 'classnames';
+import { Popover } from 'antd';
 import qs from 'query-string';
-import { getLocale } from '@/locale';
+import { FormattedMessage } from 'react-intl';
+import { getSearchObj } from '@/helpers/location';
 import './index.less';
 
 export function getMode() {
-  const search = typeof window !== 'undefined' && window.location.search;
-  const query = qs.parse(search);
+  const query = getSearchObj();
   return (query ? query.mode : 'read') as string;
 }
 
@@ -15,8 +16,8 @@ export const useModeSwitcher = ({
 }: {
   className?: string;
 }): [JSX.Element, string, (v) => void] => {
-  const i18n = getLocale();
   const mode = getMode();
+  const query = getSearchObj();
 
   const changeMode = value => {
     if (value === mode) return;
@@ -34,18 +35,27 @@ export const useModeSwitcher = ({
     window.location.href = `${pathname}?${search}${hash}`;
   };
 
+  const canPreview = !query.user;
+
   return [
     <div className={cx('mode-switcher', className)}>
       {mode !== 'edit' && (
         <span className={cx('mode-item')} onClick={() => changeMode('edit')}>
-          {i18n.get('编辑')}
+          <FormattedMessage id="编辑" />
         </span>
       )}
-      {mode === 'edit' && (
-        <span className={cx('mode-item')} onClick={() => changeMode('read')}>
-          {i18n.get('预览')}
-        </span>
-      )}
+      {mode === 'edit' &&
+        (canPreview ? (
+          <Popover content={<FormattedMessage id="无用户信息，不允许预览" />}>
+            <span>
+              <FormattedMessage id="预览" />
+            </span>
+          </Popover>
+        ) : (
+          <span className={cx('mode-item')} onClick={() => changeMode('read')}>
+            <FormattedMessage id="预览" />
+          </span>
+        ))}
     </div>,
     mode,
     changeMode,
